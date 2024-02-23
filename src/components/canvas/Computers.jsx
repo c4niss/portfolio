@@ -3,7 +3,7 @@ import { Suspense, useState, useEffect } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, Preload, useGLTF } from '@react-three/drei'
 import Loader from '../Loader'
-function  Computers(){
+function  Computers({ ismobile }){
   const computer = useGLTF('./desktop_pc/scene.gltf ')
   return (
     <mesh>
@@ -18,14 +18,30 @@ function  Computers(){
       shadow-mapSize={1024}
       />
       <primitive object={computer.scene}
-      scale={0.75}
-      position={[0, -3.25,-1.5]}
+      scale={ismobile ? 0.65 : 0.75}
+      position={ismobile ? [0, -3, -2.2] :[0, -3.25,-1.5]}
       rotation={[-0.01,-0.2,-0.1]}
       />
     </mesh>
   )
 }
 function ComputersCanvas(){
+  const [ismobile, setismobile] = useState(false);
+
+  useEffect(() => {
+    const mediaquery = window.matchMedia('( max-width: 638px)');
+    setismobile(mediaquery.matches);
+
+    function handelmediaquerychange(event){
+      setismobile(event.matches);
+    }
+
+    mediaquery.addEventListener('change', handelmediaquerychange);
+
+    return () =>{
+      mediaquery.removeEventListener('change', handelmediaquerychange);
+    }
+  }, [])
   return (
     <Canvas
     frameloop="demand"
@@ -39,7 +55,7 @@ function ComputersCanvas(){
         minPolarAngle={Math.PI / 2}
         enableZoom={false}
         />
-        <Computers />
+        <Computers ismobile={ismobile}/>
       </Suspense>
       <Preload all />
     </Canvas>
